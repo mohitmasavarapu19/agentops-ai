@@ -1,0 +1,33 @@
+# Virtual environment
+.venv/
+# Environment variables
+.env
+# Python cache
+__pycache__/
+*.py[cod]
+# IDE
+.vscode/
+.idea/
+# macOS
+.DS_Store
+# Logs
+*.log
+# Test/cache
+.pytest_cache/
+.coverage
+htmlcov/
+# Build files
+dist/
+build/
+*.egg-info/
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+# Vector database
+chroma_db/
+# Generated files
+outputs/
+# Secrets
+*.pem
+*.key
