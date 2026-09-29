@@ -134,7 +134,7 @@ class TestAgentGraph(unittest.TestCase):
         # Check second call history contains tool result
         second_call_messages = mock_bound_llm.invoke.call_args_list[1][0][0]
         has_tool_message = any(
-            isinstance(m, ToolMessage) and "$49/month" in m.content
+            isinstance(m, ToolMessage) and "$49" in m.content
             for m in second_call_messages
         )
         self.assertTrue(has_tool_message, "ToolMessage should contain retrieved pricing facts")

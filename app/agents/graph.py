@@ -44,18 +44,40 @@ class AgentState(TypedDict):
 def get_llm() -> ChatOpenAI:
     """Instantiate and return the ChatOpenAI client using environment variables.
 
+    Supports OpenAI as well as OpenAI-compatible providers such as Groq, Ollama,
+    or OpenRouter via OPENAI_BASE_URL.
+
     Raises:
-        ValueError: If OPENAI_API_KEY is not set in the environment.
+        ValueError: If OPENAI_API_KEY environment variable is not set.
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
     if not api_key:
         raise ValueError(
             "OPENAI_API_KEY environment variable is not set. "
-            "Please configure your OpenAI API key in your environment or .env file."
+            "Please configure your OpenAI or Groq API key in your environment or .env file."
         )
 
-    model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    return ChatOpenAI(model=model_name, api_key=api_key)
+    base_url = os.getenv("OPENAI_BASE_URL") or os.getenv("OPENAI_API_BASE")
+    model_name = os.getenv("OPENAI_MODEL") or os.getenv("GROQ_MODEL")
+
+    # Auto-detect Groq keys (prefixed with gsk_) and configure defaults
+    if api_key.startswith("gsk_"):
+        if not base_url:
+            base_url = "https://api.groq.com/openai/v1"
+        if not model_name or model_name in ("llama-3.3-70b-versatile", "gpt-4o-mini"):
+            model_name = "openai/gpt-oss-120b"
+
+    if not model_name:
+        model_name = "gpt-4o-mini"
+
+    kwargs: Dict[str, Any] = {
+        "model": model_name,
+        "api_key": api_key,
+    }
+    if base_url:
+        kwargs["base_url"] = base_url
+
+    return ChatOpenAI(**kwargs)
 
 
 def agent_node(state: AgentState) -> Dict[str, Any]:

@@ -1,4 +1,4 @@
-"""Tests for Milestone 2: Calculator and Knowledge Tools."""
+"""Tests for Milestone 3: Calculator and ChromaDB RAG Knowledge Tools."""
 
 import unittest
 from app.tools.calculator import calculate
@@ -40,21 +40,18 @@ class TestCalculatorTool(unittest.TestCase):
         self.assertIn("Unsupported operation 'modulo'", result)
 
 
-class TestKnowledgeTool(unittest.TestCase):
-    """Test suite for the local in-memory knowledge tool."""
+class TestRAGKnowledgeTool(unittest.TestCase):
+    """Test suite for the ChromaDB-backed RAG knowledge tool."""
 
     def test_knowledge_relevant_query(self) -> None:
-        """Verify retrieval of business facts for relevant keywords."""
-        pricing_result = lookup_knowledge.invoke({"query": "What is the pricing for AgentOps AI?"})
-        self.assertIn("$49/month", pricing_result)
-        self.assertIn("Professional ($199/month", pricing_result)
+        """Verify retrieval of business facts and source citations for relevant keywords."""
+        pricing_result = lookup_knowledge.invoke({"query": "How much does the Starter plan cost?"})
+        self.assertIn("$49", pricing_result)
+        self.assertIn("[Source: pricing.md", pricing_result)
 
-        tech_result = lookup_knowledge.invoke({"query": "What tech stack and architecture does it use?"})
-        self.assertIn("LangGraph", tech_result)
-        self.assertIn("Python 3.12", tech_result)
-
-        mission_result = lookup_knowledge.invoke({"query": "What is AgentOps AI?"})
-        self.assertIn("autonomous business intelligence", mission_result)
+        arch_result = lookup_knowledge.invoke({"query": "What architecture does AgentOps AI use?"})
+        self.assertIn("LangGraph", arch_result)
+        self.assertIn("[Source: architecture.md", arch_result)
 
     def test_knowledge_unknown_query(self) -> None:
         """Verify handling of queries with no relevant facts in the knowledge base."""

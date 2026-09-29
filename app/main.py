@@ -14,7 +14,7 @@ from app.agents.graph import run_agent
 def main() -> None:
     """Run the AgentOps AI CLI tester."""
     print("=" * 50)
-    print("AgentOps AI - Agent Runner (Milestone 2: Tool Calling)")
+    print("AgentOps AI - Agent Runner (Milestone 3: Production RAG)")
     print("=" * 50)
 
     # Check for prompt passed via command-line arguments
