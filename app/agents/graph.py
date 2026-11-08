@@ -6,11 +6,12 @@ producing a grounded final response.
 """
 
 import os
-from typing import Annotated, Any, Dict, Sequence, TypedDict
+from typing import Annotated, Any, Dict, Optional, Sequence, TypedDict
 
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.graph.state import CompiledStateGraph
@@ -110,13 +111,18 @@ def agent_node(state: AgentState) -> Dict[str, Any]:
     }
 
 
-def create_agent_graph() -> CompiledStateGraph:
+def create_agent_graph(checkpointer: Optional[MemorySaver] = None) -> CompiledStateGraph:
     """Build and compile the cyclical LangGraph agent workflow with tool calling.
 
     Workflow structure:
         START -> agent -> (conditional: tools_condition)
                    ↓ [tool calls requested]
                  tools -> agent -> END [when no tool calls remain]
+
+    Args:
+        checkpointer: Optional MemorySaver for persistent multi-turn conversation
+            memory. When provided, state is checkpointed per thread_id, enabling
+            stateful multi-turn sessions. When None, the agent is stateless.
 
     Returns:
         CompiledStateGraph instance ready for invocation.
@@ -132,28 +138,52 @@ def create_agent_graph() -> CompiledStateGraph:
     workflow.add_conditional_edges("agent", tools_condition)
     workflow.add_edge("tools", "agent")
 
-    return workflow.compile()
+    return workflow.compile(checkpointer=checkpointer)
 
 
 # Compile the default graph instance
 graph = create_agent_graph()
 
 
-def run_agent(user_input: str) -> str:
+def run_agent(
+    user_input: str,
+    session_id: Optional[str] = None,
+    checkpointer: Optional[MemorySaver] = None,
+) -> str:
     """Run the AgentOps AI agent with the given user input and return the response.
+
+    When a session_id and checkpointer are provided, the agent maintains
+    conversation history across multiple calls within the same session, enabling
+    stateful multi-turn interactions.
 
     Args:
         user_input: User question or objective.
+        session_id: Optional thread ID for session-scoped memory continuity.
+            Generate one with app.memory.checkpointer.generate_session_id().
+        checkpointer: Optional MemorySaver instance for persistent state.
+            When None, each call is independent (stateless).
 
     Returns:
         The agent's response text.
     """
+    _graph = create_agent_graph(checkpointer=checkpointer) if checkpointer else graph
+
+    # Run input through the security guardrail pipeline
+    from app.security.guardrails import run_guardrails
+    guardrail_result = run_guardrails(user_input)
+    if not guardrail_result.is_safe:
+        violation_summary = "; ".join(guardrail_result.violations)
+        raise ValueError(f"Input blocked by security guardrails: {violation_summary}")
+    # Use sanitized input (PII redacted) for all downstream processing
+    user_input = guardrail_result.sanitized_input
+
     initial_state: AgentState = {
         "user_input": user_input,
         "response": "",
         "messages": [HumanMessage(content=user_input)],
     }
-    result = graph.invoke(initial_state)
+    config = {"configurable": {"thread_id": session_id}} if session_id else {}
+    result = _graph.invoke(initial_state, config=config)
 
     # Return the response field if populated, or fallback to final AIMessage content
     if result.get("response"):

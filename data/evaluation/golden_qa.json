@@ -1,0 +1,86 @@
+[
+  {
+    "id": "pricing_001",
+    "question": "How much does the Starter plan cost per month?",
+    "expected_keywords": ["$49", "Starter", "49"],
+    "expected_source": "pricing.md",
+    "category": "pricing"
+  },
+  {
+    "id": "pricing_002",
+    "question": "What is the monthly price of the Professional tier?",
+    "expected_keywords": ["$199", "Professional", "199"],
+    "expected_source": "pricing.md",
+    "category": "pricing"
+  },
+  {
+    "id": "pricing_003",
+    "question": "What subscription plans does AgentOps AI offer?",
+    "expected_keywords": ["Starter", "Professional", "Enterprise"],
+    "expected_source": "pricing.md",
+    "category": "pricing"
+  },
+  {
+    "id": "arch_001",
+    "question": "What framework is used to orchestrate the AgentOps AI agent workflow?",
+    "expected_keywords": ["LangGraph", "StateGraph"],
+    "expected_source": "architecture.md",
+    "category": "architecture"
+  },
+  {
+    "id": "arch_002",
+    "question": "What embedding model is used in the RAG subsystem?",
+    "expected_keywords": ["all-MiniLM-L6-v2", "sentence-transformers", "MiniLM"],
+    "expected_source": "architecture.md",
+    "category": "architecture"
+  },
+  {
+    "id": "arch_003",
+    "question": "What vector database does AgentOps AI use?",
+    "expected_keywords": ["ChromaDB", "Chroma"],
+    "expected_source": "architecture.md",
+    "category": "architecture"
+  },
+  {
+    "id": "arch_004",
+    "question": "What similarity metric is used for vector search?",
+    "expected_keywords": ["cosine"],
+    "expected_source": "architecture.md",
+    "category": "architecture"
+  },
+  {
+    "id": "overview_001",
+    "question": "What is the mission of AgentOps AI?",
+    "expected_keywords": ["business intelligence", "autonomous", "insights"],
+    "expected_source": "project_overview.md",
+    "category": "overview"
+  },
+  {
+    "id": "overview_002",
+    "question": "What are the core capabilities of AgentOps AI?",
+    "expected_keywords": ["RAG", "tool", "arithmetic"],
+    "expected_source": "project_overview.md",
+    "category": "overview"
+  },
+  {
+    "id": "security_001",
+    "question": "Does AgentOps AI allow hardcoded secrets in source code?",
+    "expected_keywords": ["secrets", "forbidden", "hardcoded", "Zero"],
+    "expected_source": "security.md",
+    "category": "security"
+  },
+  {
+    "id": "security_002",
+    "question": "How does AgentOps AI handle API keys and credentials?",
+    "expected_keywords": [".env", "environment", "API key"],
+    "expected_source": "security.md",
+    "category": "security"
+  },
+  {
+    "id": "security_003",
+    "question": "Are embeddings computed locally or sent to external services?",
+    "expected_keywords": ["local", "sentence-transformer", "locally"],
+    "expected_source": "security.md",
+    "category": "security"
+  }
+]
